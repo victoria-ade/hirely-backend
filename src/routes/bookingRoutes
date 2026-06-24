@@ -1,0 +1,17 @@
+const express = require('express');
+const router = express.Router();
+const {
+  createBooking,
+  getMyBookings,
+  getProviderBookings,
+  updateBookingStatus,
+} = require('../controllers/bookingController');
+const {protect} = require('../middleware/authMiddleware');
+const {providerOnly} = require('../middleware/providerMiddleware');
+
+router.post('/', protect, createBooking);
+router.get('/my-bookings', protect, getMyBookings);
+router.get('/provider', protect, providerOnly, getProviderBookings);
+router.patch('/:id', protect, providerOnly, updateBookingStatus);
+
+module.exports = router;

@@ -85,7 +85,7 @@ const updateService = async (req, res) => {
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       req.body,
-      { new: true, runValidators: true }
+      { returnDocument: 'after', runValidators: true }
     );
 
     res.status(200).json(updatedService);
