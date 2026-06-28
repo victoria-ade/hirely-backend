@@ -6,7 +6,6 @@ const Service = require('../models/Service');
 const createService = async (req, res) => {
   try {
     const { title, description, category, price, location } = req.body;
-
     const service = await Service.create({
       title,
       description,
@@ -15,7 +14,6 @@ const createService = async (req, res) => {
       location,
       provider: req.user._id,
     });
-
     res.status(201).json(service);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -28,17 +26,27 @@ const createService = async (req, res) => {
 const getServices = async (req, res) => {
   try {
     const filter = {};
-
     if (req.query.category) {
       filter.category = req.query.category;
     }
-
     if (req.query.location) {
       filter.location = new RegExp(req.query.location, 'i');
     }
-
     const services = await Service.find(filter)
       .populate('provider', 'name email')
+      .sort({ createdAt: -1 });
+    res.status(200).json(services);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get services by logged in provider
+// @route   GET /api/services/my-services
+// @access  Private/Provider
+const getMyServices = async (req, res) => {
+  try {
+    const services = await Service.find({ provider: req.user._id })
       .sort({ createdAt: -1 });
 
     res.status(200).json(services);
@@ -46,6 +54,7 @@ const getServices = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Get single service
 // @route   GET /api/services/:id
@@ -56,11 +65,9 @@ const getServiceById = async (req, res) => {
       'provider',
       'name email'
     );
-
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
-
     res.status(200).json(service);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -73,21 +80,17 @@ const getServiceById = async (req, res) => {
 const updateService = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id);
-
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
-
     if (service.provider.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to update this service' });
     }
-
     const updatedService = await Service.findByIdAndUpdate(
       req.params.id,
       req.body,
       { returnDocument: 'after', runValidators: true }
     );
-
     res.status(200).json(updatedService);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -100,17 +103,13 @@ const updateService = async (req, res) => {
 const deleteService = async (req, res) => {
   try {
     const service = await Service.findById(req.params.id);
-
     if (!service) {
       return res.status(404).json({ message: 'Service not found' });
     }
-
     if (service.provider.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Not authorized to delete this service' });
     }
-
     await service.deleteOne();
-
     res.status(200).json({ message: 'Service deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -120,7 +119,10 @@ const deleteService = async (req, res) => {
 module.exports = {
   createService,
   getServices,
+  getMyServices,
   getServiceById,
   updateService,
   deleteService,
 };
+
+
