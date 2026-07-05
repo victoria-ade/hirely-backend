@@ -16,7 +16,10 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'https://hirely-frontend-omega.vercel.app',
+  credentials: true,
+}));
 app.use(express.json());
 
 // Routes
