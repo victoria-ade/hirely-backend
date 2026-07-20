@@ -48,26 +48,34 @@ const register = async (req, res) => {
     const verificationUrl = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
 
     // Send verification email
-    await sendEmail({
-      to: user.email,
-      subject: 'Verify your Hirely account',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #2563EB;">Welcome to Hirely, ${user.name}! 👋</h2>
-          <p style="color: #374151;">Thanks for signing up. Please verify your email address to get started.</p>
-          <a 
-            href="${verificationUrl}" 
-            style="display: inline-block; background-color: #2563EB; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 16px 0;"
-          >
-            Verify My Email
-          </a>
-          <p style="color: #6B7280; font-size: 14px;">This link expires in 24 hours.</p>
-          <p style="color: #6B7280; font-size: 14px;">If you didn't create an account, you can safely ignore this email.</p>
-          <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;" />
-          <p style="color: #9CA3AF; font-size: 12px;">Hirely — Find trusted local services</p>
-        </div>
-      `,
-    });
+    // Respond immediately - don't make user wait for email
+res.status(201).json({
+  message: 'Registration successful. Please check your email to verify your account.',
+});
+
+// Send email in the background after responding
+sendEmail({
+  to: user.email,
+  subject: 'Verify your Hirely account',
+  html: `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #2563EB;">Welcome to Hirely, ${user.name}! 👋</h2>
+      <p style="color: #374151;">Thanks for signing up. Please verify your email address to get started.</p>
+      <a 
+        href="${verificationUrl}" 
+        style="display: inline-block; background-color: #2563EB; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 16px 0;"
+      >
+        Verify My Email
+      </a>
+      <p style="color: #6B7280; font-size: 14px;">This link expires in 24 hours.</p>
+      <p style="color: #6B7280; font-size: 14px;">If you didn't create an account, you can safely ignore this email.</p>
+      <hr style="border: none; border-top: 1px solid #E5E7EB; margin: 24px 0;" />
+      <p style="color: #9CA3AF; font-size: 12px;">Hirely — Find trusted local services</p>
+    </div>
+  `,
+}).catch((err) => {
+  console.error('Email sending failed:', err.message);
+});
 
     res.status(201).json({
       message: 'Registration successful. Please check your email to verify your account.',
