@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const userSchema = new mongoose.Schema(
   {
     name: {
@@ -23,18 +24,7 @@ const userSchema = new mongoose.Schema(
       enum: ['customer', 'provider'],
       default: 'customer',
     },
-    isEmailVerified: {
-      type: Boolean,
-      default: false,
-    },
-    emailVerifcationToken: {
-      type: String,
-    },
-    emailVerificationExpires: {
-      type: Date,
-    },
   },
-
   {
     timestamps: true,
   }
